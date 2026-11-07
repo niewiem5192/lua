@@ -155,15 +155,6 @@ until Environment and Environment.FOVCircle and Environment.FOVCircleOutline
 setrenderproperty(Environment.FOVCircle, "Visible", false)
 setrenderproperty(Environment.FOVCircleOutline, "Visible", false)
 
---// Tworzenie linii dla gwiazdy Dawida (6 linii)
-local StarLines = {}
-for i = 1, 6 do
-	local line = Drawingnew("Line")
-	line.Visible = false
-	line.Thickness = 1.5
-	table.insert(StarLines, line)
-end
-
 --// Funkcja czyszcząca ESP
 local function CleanESP(player)
 	if Environment.ESPObjects[player] then
@@ -302,36 +293,6 @@ local Load = function()
 
 	ServiceConnections.ESPConnection = Connect(__index(RunService, UpdateMode), LPH_NO_VIRTUALIZE(function()
 		local ESPTable = Environment.ESPObjects
-
-		local ccConfig = Environment.CustomCrosshair
-		if ccConfig.Enabled then
-			local center = Camera.ViewportSize / 2
-			local radius = ccConfig.Size or 14
-			local baseAngle = ccConfig.Spin and (tick() * (ccConfig.Speed * 2)) or 0
-			local sharedRainbowColor = GetRainbowColor(1)
-			
-			local pts = {}
-			for i = 1, 6 do
-				local angle = baseAngle + ((i - 1) * (math.pi / 3))
-				pts[i] = Vector2new(center.X + math.cos(angle) * radius, center.Y + math.sin(angle) * radius)
-			end
-			
-			StarLines[1].From = pts[1] StarLines[1].To = pts[3]
-			StarLines[2].From = pts[3] StarLines[2].To = pts[5]
-			StarLines[3].From = pts[5] StarLines[3].To = pts[1]
-			StarLines[4].From = pts[2] StarLines[4].To = pts[4]
-			StarLines[5].From = pts[4] StarLines[5].To = pts[6]
-			StarLines[6].From = pts[6] StarLines[6].To = pts[2]
-
-			for i = 1, 6 do
-				StarLines[i].Visible = true
-				StarLines[i].Color = sharedRainbowColor
-			end
-		else
-			for _, line in ipairs(StarLines) do
-				line.Visible = false
-			end
-		end
 
 		for _, Player in next, GetPlayers(Players) do
 			if Player ~= LocalPlayer then
@@ -659,52 +620,6 @@ local function BuildGUI()
 		})
 	end)
 
-	local VisualsTab = Window:CreateTab("Celownik", 4483362458)
-
-	pcall(function()
-		VisualsTab:CreateToggle({
-			Name = "Włącz Celownik (Gwiazda Rainbow)",
-			CurrentValue = Environment.CustomCrosshair.Enabled,
-			Callback = function(Value)
-				Environment.CustomCrosshair.Enabled = Value
-			end,
-		})
-	end)
-
-	pcall(function()
-		VisualsTab:CreateToggle({
-			Name = "Obrót celownika (Kręcenie się)",
-			CurrentValue = Environment.CustomCrosshair.Spin,
-			Callback = function(Value)
-				Environment.CustomCrosshair.Spin = Value
-			end,
-		})
-	end)
-
-	pcall(function()
-		VisualsTab:CreateSlider({
-			Name = "Rozmiar celownika (Skala)",
-			Range = {4, 30},
-			Increment = 1,
-			CurrentValue = Environment.CustomCrosshair.Size,
-			Callback = function(Value)
-				Environment.CustomCrosshair.Size = Value
-			end,
-		})
-	end)
-
-	pcall(function()
-		VisualsTab:CreateSlider({
-			Name = "Prędkość obrotu",
-			Range = {0.5, 10},
-			Increment = 0.5,
-			CurrentValue = Environment.CustomCrosshair.Speed,
-			Callback = function(Value)
-				Environment.CustomCrosshair.Speed = Value
-			end,
-		})
-	end)
-
 	local TriggerTab = Window:CreateTab("Triggerbot", 4483362458)
 
 	pcall(function()
@@ -785,9 +700,6 @@ Environment.Exit = LPH_NO_VIRTUALIZE(function(self)
 	pcall(function() self.FOVCircle:Remove() end)
 	pcall(function() self.FOVCircleOutline:Remove() end)
 	pcall(function() self.Tracer:Remove() end)
-	for _, line in ipairs(StarLines) do
-		pcall(function() line:Remove() end)
-	end
 	if self.ESPObjects then
 		for player, _ in next, self.ESPObjects do
 			CleanESP(player)
